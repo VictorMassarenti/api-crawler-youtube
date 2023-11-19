@@ -1,4 +1,6 @@
+const { parse } = require("date-fns");
 const pup = require("puppeteer");
+const { ptBR } = require("date-fns/locale");
 
 const url = "https://www.youtube.com/";
 const searchFor = "@DerrotandoFilmes";
@@ -11,7 +13,8 @@ const searchFor = "@DerrotandoFilmes";
 
   let links = [];
 
-  const videosCount = await page.$eval("#videos-count > span", (element) => {
+  const videosCount = 30;
+  await page.$eval("#videos-count > span", (element) => {
     return element.innerText;
   });
 
@@ -41,16 +44,38 @@ const searchFor = "@DerrotandoFilmes";
     await page.waitForSelector("#description-inline-expander > #expand");
     await page.click("#description-inline-expander > #expand");
 
-    const viewsCount = await page.$eval(
+    const views = await page.$eval(
       "#info-container > #info > span",
       (element) => {
         return element.innerText;
       }
     );
-    viewsList.push(viewsCount);
-  }
 
-  console.log(viewsList.length);
+    const title = await page.$eval(
+      "#title > h1 > yt-formatted-string",
+      (element) => {
+        return element.innerText;
+      }
+    );
+
+    const date = await page.$eval(
+      "#info-container > #info > :nth-child(3)",
+      (element) => {
+        return element.innerText;
+      }
+    );
+
+    const crawlerObject = {
+      url: link.url,
+      title,
+      date: parse(date, "dd 'de' MMM'.' 'de' yyyy", new Date(), {
+        locale: ptBR,
+      }),
+      views: views.split(" ")[0].replaceAll(".", ""),
+    };
+
+    viewsList.push(crawlerObject);
+  }
 
   await browser.close();
 })();
