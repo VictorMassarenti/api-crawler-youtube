@@ -13,8 +13,7 @@ const searchFor = "@DerrotandoFilmes";
 
   let links = [];
 
-  const videosCount = 30;
-  await page.$eval("#videos-count > span", (element) => {
+  const videosCount = await page.$eval("#videos-count > span", (element) => {
     return element.innerText;
   });
 
